@@ -30,33 +30,52 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
 		FVector InitialLocation;
 
+	//Higher Frequency, means the blocks moves rapidly
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement", meta = (AllowPrivateAccess = "true"))
 		float OscillationFrequency;
 
+	//Higher Amplitud, there is more swing in the blocks movement
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement", meta = (AllowPrivateAccess = "true"))
 		float OscillationAmplitud;
 
+	//Updates sin function using delta time
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
 		float TimeElapsed; 
 
+	//When the player presses play the block stops moving 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement", meta = (AllowPrivateAccess = "true"))
 		bool StopMoving;
+
+	//Spawning blocks
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Spawning", meta = (AllowPrivateAccess = "true"))
+		TSubclassOf<ABlock> SplitBlockClass = ABlock::StaticClass();
+
+	//Class that is going to be spawned with physics enabled
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Spawning", meta = (AllowPrivateAccess = "true"))
+		//EditDefaulysOnly: changes made during runtime or on instances of the object won't affect the default value.
+		TSubclassOf<ABlock> PhysicsBlockClass = ABlock::StaticClass();
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawning", meta = (AllowPrivateAccess = "true"))
+		FVector ImpulseDirection = FVector(1.0f, 0.0f, 1.0f);
 
 public: 
 	UFUNCTION()
 		void SplitBlock();
 
 	UFUNCTION()
-		void SpawnPhysicsBlock(FVector SpawnLocation, FVector ImpulseDirection);
+		void SpawnPhysicsBlock(FVector SpawnLocation, FVector FunctionImpulseDirection);
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawning")
-		TSubclassOf<ABlock> SplitBlockClass;
+	UFUNCTION()
+		void ResizeBlock(ABlock* NewBlock);
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawning")
-		//EditDefaulysOnly: changes made during runtime or on instances of the object won't affect the default value
-		TSubclassOf<ABlock> PhysicsBlockClass;
+	UFUNCTION()
+		void BlockOscillation(float DeltaTime);
 
 	//Impulse Strength when spliting
 	UPROPERTY(EditAnywhere, Category = "Spawning")
 		float ImpulseStrength;
+
+	//Size to which the blocks will spawn
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawning")
+		float SizeToResize;
 };

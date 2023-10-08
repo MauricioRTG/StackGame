@@ -10,8 +10,7 @@ ABlock::ABlock()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	StopMoving = false;
-
+	//Set Static Mesh
 	BlockMesh = FindComponentByClass<UStaticMeshComponent>();
 
 	if (!BlockMesh)
@@ -20,14 +19,16 @@ ABlock::ABlock()
 		RootComponent = BlockMesh;
 	}
 
+	//Movement
+	StopMoving = false;
 	InitialLocation = GetActorLocation();
 	OscillationFrequency = 1.0f;
 	OscillationAmplitud = 100.0f;
 	TimeElapsed = 0.0f;
-
-	SplitBlockClass = ABlock::StaticClass();
-	PhysicsBlockClass = ABlock::StaticClass();
+	
+	//Spawning
 	ImpulseStrength = 5000.0f;
+	SizeToResize = 0.5f;
 }
 
 // Called when the game starts or when spawned
@@ -51,62 +52,66 @@ void ABlock::Tick(float DeltaTime)
 
 	if (!StopMoving)
 	{
-		TimeElapsed += DeltaTime;
-
-		float OscillationValue = OscillationAmplitud * FMath::Sin(OscillationFrequency * TimeElapsed);
-
-		FVector NewLocation = FVector(OscillationValue, 0.0f, 0.0f);
-
-		SetActorLocation(NewLocation);
+		BlockOscillation(DeltaTime);
 	}
+}
+
+void ABlock::BlockOscillation(float DeltaTime)
+{
+	TimeElapsed += DeltaTime;
+
+	float OscillationValue = OscillationAmplitud * FMath::Sin(OscillationFrequency * TimeElapsed);
+
+	FVector NewLocation = FVector(OscillationValue, 0.0f, 0.0f);
+
+	SetActorLocation(NewLocation);
 }
 
 void ABlock::SplitBlock()
 {
-	FVector SplitLocation = GetActorLocation() + FVector(0.0f, 0.0f, 100.0f);
+	FVector SplitLocation = GetActorLocation() + FVector(0.0f, 0.0f, 0.0f);
 
 	//Destroy the current block
 	Destroy();
 
-	SpawnPhysicsBlock(SplitLocation, FVector(10.0f, 0.0f, 1.0f));
-	SpawnPhysicsBlock(SplitLocation, FVector(-10.0f, 0.0f, 1.0f));
+	//Spawn two blocks half the size of the original block
+	SpawnPhysicsBlock(SplitLocation, FVector(ImpulseDirection.X, ImpulseDirection.Y, ImpulseDirection.Z));
+	SpawnPhysicsBlock(SplitLocation, FVector(-ImpulseDirection.X, ImpulseDirection.Y, ImpulseDirection.Z));
 }
 
-void ABlock::SpawnPhysicsBlock(FVector SpawnLocation, FVector ImpulseDirection)
+void ABlock::SpawnPhysicsBlock(FVector SpawnLocation, FVector FunctionImpulseDirection)
 {
 	StopMoving = true;
-	// Disable collisions for the original block during the split
-	BlockMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
+	//Spawn block
 	ABlock* NewBlock = GetWorld()->SpawnActor<ABlock>(PhysicsBlockClass, SpawnLocation, FRotator::ZeroRotator);
 
 	if (NewBlock)
 	{
 		NewBlock->StopMoving = true;
-		// Get the current scale of the actor
-		FVector CurrentScale = NewBlock->GetActorScale3D();
+		
+		ResizeBlock(NewBlock);
 
-		// Adjust the scale in the X-axis by half
-		FVector NewScale = FVector(CurrentScale.X * 0.5f, CurrentScale.Y, CurrentScale.Z);
-
-		// Set the new scale for the actor
-		NewBlock->SetActorScale3D(NewScale);
-
-
-		if (BlockMesh && NewBlock->BlockMesh)
+		//Add impulse
+		if (NewBlock->BlockMesh && BlockMesh)
 		{
+			//Set same static mesh to new block
 			NewBlock->BlockMesh->SetStaticMesh(BlockMesh->GetStaticMesh());
-		}
-
-		// Disable collisions for the new block during the split
-		NewBlock->BlockMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-
-		if (NewBlock->BlockMesh)
-		{
-			NewBlock->BlockMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+			//Set block to simulate physics so we can add impulse to it
 			NewBlock->BlockMesh->SetSimulatePhysics(true);
-			NewBlock->BlockMesh->AddImpulse(ImpulseDirection * ImpulseStrength);
+			NewBlock->BlockMesh->AddImpulse(FunctionImpulseDirection * ImpulseStrength);
 		}
 	}
+}
+
+void ABlock::ResizeBlock(ABlock* NewBlock)
+{
+	// Get the current scale of the actor
+	FVector CurrentScale = NewBlock->GetActorScale3D();
+
+	// Adjust the scale in the X-axis by half
+	FVector NewScale = FVector(CurrentScale.X * SizeToResize, CurrentScale.Y, CurrentScale.Z);
+
+	NewBlock->SetActorScale3D(NewScale);
 }
 
