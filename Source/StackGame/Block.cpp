@@ -75,18 +75,32 @@ void ABlock::SplitBlock()
 	FVector BlockLocation = GetActorLocation();
 	float BoxSizeBound = BlockMesh->Bounds.BoxExtent.X * 2;
 	//If it goes to the left we choose the negative bound -100, else 100
-	
+	UE_LOG(LogTemp, Log, TEXT("CurrentLocation: %lf"), BlockLocation.X);
 
-	//If the block does overlap with the bottom box then split the box, if not let it fall.
-	if ((BlockLocation.X * 2) < BoxSizeBound && (BlockLocation.X * 2) > (-BoxSizeBound) )
+	//Split Block if it overlaps with the bottom block, if not let it fall
+	if (BlockLocation.X < BoxSizeBound && BlockLocation.X > -BoxSizeBound)
 	{
+		//If it goes to the right then the bound is 100, if its to the left the bound is -100
 		BoxSizeBound = (BlockLocation.X > 0 ? BoxSizeBound : -BoxSizeBound);
 		UE_LOG(LogTemp, Log, TEXT("Box overlaps"));
+
+		//Spawn block that is the size of the overlapping region
 		float OverlappingWidth = FMath::Abs(BlockLocation.X - BoxSizeBound);
 		FVector newLocation = FVector((BlockLocation.X / 2), BlockLocation.Y, BlockLocation.Z);
 		float newSize = OverlappingWidth / BoxSizeBound;
-
 		SpawnPhysicsBlock(newLocation, FVector(0.0f, 0.0f, 0.0f), false, newSize);
+
+		//Avoid spawning a second block when the original block is completly overlapping the bottom block
+		if (BlockLocation.X != 0)
+		{
+			//Spawn block that is the size of the non overlapping region
+			float NonOverlappingWidth = (BlockMesh->Bounds.BoxExtent.X * 2) - OverlappingWidth;
+			FVector NonOverlappingBlockLocation = FVector(BlockLocation.X, BlockLocation.Y, BlockLocation.Z);
+			float NonOverlappingBlockSize = NonOverlappingWidth / BoxSizeBound;
+			SpawnPhysicsBlock(NonOverlappingBlockLocation, FVector(0.0f, 0.0f, 0.0f), true, NonOverlappingBlockSize);
+		}
+		
+		//Destroy original block
 		Destroy();
 	}
 	else
@@ -95,6 +109,7 @@ void ABlock::SplitBlock()
 		BlockMesh->SetSimulatePhysics(true);
 		StopMoving = true;
 	}
+	
 }
 
 void ABlock::SpawnPhysicsBlock(FVector SpawnLocation, FVector FunctionImpulseDirection, bool SimulatePhysics, float NewWidth)
