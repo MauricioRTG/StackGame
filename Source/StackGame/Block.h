@@ -47,26 +47,32 @@ private:
 		bool StopMoving;
 
 	//Spawning blocks
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Spawning", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spawning", meta = (AllowPrivateAccess = "true"))
 		TSubclassOf<ABlock> SplitBlockClass = ABlock::StaticClass();
 
 	//Class that is going to be spawned with physics enabled
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Spawning", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spawning", meta = (AllowPrivateAccess = "true"))
 		//EditDefaulysOnly: changes made during runtime or on instances of the object won't affect the default value.
 		TSubclassOf<ABlock> PhysicsBlockClass = ABlock::StaticClass();
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawning", meta = (AllowPrivateAccess = "true"))
 		FVector ImpulseDirection = FVector(1.0f, 0.0f, 1.0f);
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Spawning", meta = (AllowPrivateAccess = "true"))
+		float MinBoundsX;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Spawning", meta = (AllowPrivateAccess = "true"))
+		float MaxBoundsX;
+
 public: 
 	UFUNCTION()
 		void SplitBlock();
 
 	UFUNCTION()
-		void SpawnPhysicsBlock(FVector SpawnLocation, FVector FunctionImpulseDirection);
+		void SpawnPhysicsBlock(FVector SpawnLocation, FVector FunctionImpulseDirection, bool SimulatePhysics, float NewWidth);
 
 	UFUNCTION()
-		void ResizeBlock(ABlock* NewBlock);
+		void ResizeBlock(ABlock* NewBlock, float NewWidth);
 
 	UFUNCTION()
 		void BlockOscillation(float DeltaTime);

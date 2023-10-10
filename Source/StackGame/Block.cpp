@@ -29,6 +29,9 @@ ABlock::ABlock()
 	//Spawning
 	ImpulseStrength = 5000.0f;
 	SizeToResize = 0.5f;
+
+	MinBoundsX = -BlockMesh->Bounds.BoxExtent.X;
+	MaxBoundsX = BlockMesh->Bounds.BoxExtent.X;
 }
 
 // Called when the game starts or when spawned
@@ -69,17 +72,32 @@ void ABlock::BlockOscillation(float DeltaTime)
 
 void ABlock::SplitBlock()
 {
-	FVector SplitLocation = GetActorLocation() + FVector(0.0f, 0.0f, 0.0f);
+	FVector BlockLocation = GetActorLocation();
+	float BoxSizeBound = BlockMesh->Bounds.BoxExtent.X * 2;
+	//If it goes to the left we choose the negative bound -100, else 100
+	
 
-	//Destroy the current block
-	Destroy();
+	//If the block does overlap with the bottom box then split the box, if not let it fall.
+	if ((BlockLocation.X * 2) < BoxSizeBound && (BlockLocation.X * 2) > (-BoxSizeBound) )
+	{
+		BoxSizeBound = (BlockLocation.X > 0 ? BoxSizeBound : -BoxSizeBound);
+		UE_LOG(LogTemp, Log, TEXT("Box overlaps"));
+		float OverlappingWidth = FMath::Abs(BlockLocation.X - BoxSizeBound);
+		FVector newLocation = FVector((BlockLocation.X / 2), BlockLocation.Y, BlockLocation.Z);
+		float newSize = OverlappingWidth / BoxSizeBound;
 
-	//Spawn two blocks half the size of the original block
-	SpawnPhysicsBlock(SplitLocation, FVector(ImpulseDirection.X, ImpulseDirection.Y, ImpulseDirection.Z));
-	SpawnPhysicsBlock(SplitLocation, FVector(-ImpulseDirection.X, ImpulseDirection.Y, ImpulseDirection.Z));
+		SpawnPhysicsBlock(newLocation, FVector(0.0f, 0.0f, 0.0f), false, newSize);
+		Destroy();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Log, TEXT("Box doesn't overlap"));
+		BlockMesh->SetSimulatePhysics(true);
+		StopMoving = true;
+	}
 }
 
-void ABlock::SpawnPhysicsBlock(FVector SpawnLocation, FVector FunctionImpulseDirection)
+void ABlock::SpawnPhysicsBlock(FVector SpawnLocation, FVector FunctionImpulseDirection, bool SimulatePhysics, float NewWidth)
 {
 	StopMoving = true;
 
@@ -90,27 +108,34 @@ void ABlock::SpawnPhysicsBlock(FVector SpawnLocation, FVector FunctionImpulseDir
 	{
 		NewBlock->StopMoving = true;
 		
-		ResizeBlock(NewBlock);
-
-		//Add impulse
+		//Set mesh and physics
 		if (NewBlock->BlockMesh && BlockMesh)
 		{
 			//Set same static mesh to new block
 			NewBlock->BlockMesh->SetStaticMesh(BlockMesh->GetStaticMesh());
-			//Set block to simulate physics so we can add impulse to it
-			NewBlock->BlockMesh->SetSimulatePhysics(true);
-			NewBlock->BlockMesh->AddImpulse(FunctionImpulseDirection * ImpulseStrength);
+			if (SimulatePhysics)
+			{
+				//Set block to simulate physics so we can add impulse to it
+				NewBlock->BlockMesh->SetSimulatePhysics(true);
+				NewBlock->BlockMesh->AddImpulse(FunctionImpulseDirection * ImpulseStrength);
+			}
 		}
+
+		ResizeBlock(NewBlock, NewWidth);
 	}
 }
 
-void ABlock::ResizeBlock(ABlock* NewBlock)
+void ABlock::ResizeBlock(ABlock* NewBlock, float NewWidth)
 {
 	// Get the current scale of the actor
 	FVector CurrentScale = NewBlock->GetActorScale3D();
 
+	UE_LOG(LogTemp, Warning, TEXT("CurrentScale: %lf"), CurrentScale.X);
+
 	// Adjust the scale in the X-axis by half
-	FVector NewScale = FVector(CurrentScale.X * SizeToResize, CurrentScale.Y, CurrentScale.Z);
+	FVector NewScale = FVector(NewWidth, CurrentScale.Y, CurrentScale.Z);
+
+	UE_LOG(LogTemp, Warning, TEXT("NewScale: %lf"), NewScale.X);
 
 	NewBlock->SetActorScale3D(NewScale);
 }
