@@ -64,6 +64,9 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Spawning", meta = (AllowPrivateAccess = "true"))
 		float MaxBoundsX;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
+		bool InputEnabled = true;
+
 public: 
 	UFUNCTION()
 		void SplitBlock();
@@ -76,6 +79,12 @@ public:
 
 	UFUNCTION()
 		void BlockOscillation(float DeltaTime);
+
+	UFUNCTION()
+		void SetInputEnabled(bool Enabled);
+
+	UFUNCTION()
+		void HandleInput();
 
 	//Impulse Strength when spliting
 	UPROPERTY(EditAnywhere, Category = "Spawning")

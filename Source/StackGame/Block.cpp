@@ -39,13 +39,7 @@ void ABlock::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// Bind the SplitBlock function to the space key press
-	APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-	if (PlayerController)
-	{
-		PlayerController->InputComponent->BindAction("SplitBlock", IE_Pressed, this, &ABlock::SplitBlock);
-	}
-	
+	HandleInput();
 }
 
 // Called every frame
@@ -56,6 +50,29 @@ void ABlock::Tick(float DeltaTime)
 	if (!StopMoving)
 	{
 		BlockOscillation(DeltaTime);
+	}
+	else
+	{
+		SetInputEnabled(false);
+
+	}
+}
+
+void ABlock::HandleInput()
+{
+
+	// Bind the SplitBlock function to the space key press
+	APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+	if (PlayerController)
+	{
+		if (InputEnabled)
+		{
+			PlayerController->InputComponent->BindAction("SplitBlock", IE_Pressed, this, &ABlock::SplitBlock);
+		}
+		else
+		{
+			PlayerController->InputComponent->ClearBindingsForObject(this);
+		}
 	}
 }
 
@@ -155,3 +172,7 @@ void ABlock::ResizeBlock(ABlock* NewBlock, float NewWidth)
 	NewBlock->SetActorScale3D(NewScale);
 }
 
+void ABlock::SetInputEnabled(bool Enabled)
+{
+	InputEnabled = Enabled;
+}
