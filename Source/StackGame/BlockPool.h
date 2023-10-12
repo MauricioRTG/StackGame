@@ -16,11 +16,14 @@ public:
 	// Sets default values for this actor's properties
 	ABlockPool();
 
+	UFUNCTION()
 	ABlock* SpawnBlock();
 
+	UFUNCTION()
 	void ReturnToPool(ABlock* BlockToReturn);
 
-	void Initialize(int32 PoolSize);
+	UFUNCTION()
+	void InitializePool(int32 PoolSize);
 
 protected:
 	// Called when the game starts or when spawned
@@ -31,5 +34,9 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 private:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "BlockPool", meta = (AllowPrivateAccess = "true"))
 	TArray<ABlock*> BlockPool;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BlockPool", meta = (AllowPrivateAccess = "true"))
+	UStaticMesh* BlockMesh;
 };

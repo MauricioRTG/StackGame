@@ -17,6 +17,8 @@ class STACKGAME_API AMyStackGamePlayerController : public APlayerController
 public: 
 	AMyStackGamePlayerController();
 
+	void SetupPlayerInputComponent(APlayerController* PlayerInputComponent);
+
 protected: 
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;

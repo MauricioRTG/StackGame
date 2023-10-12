@@ -24,7 +24,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 private:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Component", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Component", meta = (AllowPrivateAccess = "true"))
 		UStaticMeshComponent* BlockMesh;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
@@ -67,6 +67,9 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
 		bool InputEnabled = true;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
+		float YOffset = 0.0f;
+
 public: 
 	UFUNCTION()
 		void SplitBlock();
@@ -85,6 +88,12 @@ public:
 
 	UFUNCTION()
 		void HandleInput();
+
+	UFUNCTION()
+		void SetYOffset(float NewYLocation);
+
+	UFUNCTION()
+		void SetBlockMesh(UStaticMesh* FunctionBlockMesh);
 
 	//Impulse Strength when spliting
 	UPROPERTY(EditAnywhere, Category = "Spawning")

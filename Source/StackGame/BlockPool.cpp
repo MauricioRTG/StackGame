@@ -8,7 +8,6 @@ ABlockPool::ABlockPool()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
 }
 
 ABlock* ABlockPool::SpawnBlock()
@@ -30,14 +29,25 @@ void ABlockPool::ReturnToPool(ABlock* BlockToReturn)
 	}
 }
 
-void ABlockPool::Initialize(int32 PoolSize)
+void ABlockPool::InitializePool(int32 PoolSize)
 {
 	for (int i = 0; i < PoolSize; i++)
 	{
 		ABlock* NewBlock = GetWorld()->SpawnActor<ABlock>(FVector::ZeroVector, FRotator::ZeroRotator);
 		if (NewBlock)
 		{
-			NewBlock->SetActorHiddenInGame(true);
+			UStaticMeshComponent* NewBlockMeshComponent = NewBlock->FindComponentByClass<UStaticMeshComponent>();
+			if (NewBlockMeshComponent)
+			{
+				UE_LOG(LogTemp, Log, TEXT("BlockMeshComponent found"));
+
+				NewBlockMeshComponent->SetStaticMesh(BlockMesh);
+			}
+			else
+			{
+				UE_LOG(LogTemp, Log, TEXT("No BlockMeshComponent found"));
+			}
+			NewBlock->SetActorHiddenInGame(false);
 			NewBlock->SetInputEnabled(false);
 			BlockPool.Add(NewBlock);
 		}

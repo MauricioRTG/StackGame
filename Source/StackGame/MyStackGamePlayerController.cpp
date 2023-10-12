@@ -2,6 +2,7 @@
 
 
 #include "MyStackGamePlayerController.h"
+#include <Kismet/GameplayStatics.h>
 
 AMyStackGamePlayerController::AMyStackGamePlayerController()
 {
@@ -19,8 +20,7 @@ void AMyStackGamePlayerController::SetupInputComponent()
 {
     Super::SetupInputComponent();
 
-    // Bind the OnSpaceKeyPressed function to the space key press event
-    InputComponent->BindAction("SpaceKey", IE_Pressed, this, &AMyStackGamePlayerController::OnSpaceKeyPressed);
+	InputComponent->BindAction("SplitBlock", IE_Pressed, this, &AMyStackGamePlayerController::OnSpaceKeyPressed);
 }
 
 void AMyStackGamePlayerController::OnSpaceKeyPressed()

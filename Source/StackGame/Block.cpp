@@ -39,6 +39,9 @@ void ABlock::BeginPlay()
 {
 	Super::BeginPlay();
 
+	SplitBlockClass = ABlock::StaticClass();
+	PhysicsBlockClass = ABlock::StaticClass();
+
 	HandleInput();
 }
 
@@ -54,8 +57,9 @@ void ABlock::Tick(float DeltaTime)
 	else
 	{
 		SetInputEnabled(false);
-
 	}
+
+	HandleInput();
 }
 
 void ABlock::HandleInput()
@@ -76,13 +80,23 @@ void ABlock::HandleInput()
 	}
 }
 
+void ABlock::SetYOffset(float NewYLocation)
+{
+	YOffset = NewYLocation;
+}
+
+void ABlock::SetBlockMesh(UStaticMesh* FunctionBlockMesh)
+{
+	BlockMesh->SetStaticMesh(FunctionBlockMesh);
+}
+
 void ABlock::BlockOscillation(float DeltaTime)
 {
 	TimeElapsed += DeltaTime;
 
 	float OscillationValue = OscillationAmplitud * FMath::Sin(OscillationFrequency * TimeElapsed);
 
-	FVector NewLocation = FVector(OscillationValue, 0.0f, 0.0f);
+	FVector NewLocation = FVector(OscillationValue, YOffset, 0.0f);
 
 	SetActorLocation(NewLocation);
 }
