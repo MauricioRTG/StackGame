@@ -31,5 +31,15 @@ public:
 		void AddBlockToScene();
 private:
 	UPROPERTY()
-		class ABlockPool* BlockPool;
+	ABlockPool* BlockPool;
+
+	UPROPERTY()
+	ABlockPool* BP_BlockPool;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "BlockPool", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<ABlockPool> BlockPoolClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "BlockPool", meta = (AllowPrivateAccess = "true"))
+	int32 PoolSize = 1;
+
 };

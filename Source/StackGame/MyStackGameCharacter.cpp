@@ -17,8 +17,15 @@ void AMyStackGameCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	BlockPool = GetWorld()->SpawnActor<ABlockPool>(FVector::ZeroVector, FRotator::ZeroRotator);
-	BlockPool->InitializePool(1);
+	BP_BlockPool = GetWorld()->SpawnActor<ABlockPool>(BlockPoolClass, FVector::ZeroVector, FRotator::ZeroRotator);
+	if (BP_BlockPool)
+	{
+		BlockPool = Cast<ABlockPool>(BP_BlockPool);
+		if (BlockPool)
+		{
+			BlockPool->InitializePool(PoolSize);
+		}
+	}
 	
 	//To avoid handling in player controller, because is not a complex logic
 	APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
@@ -44,7 +51,7 @@ void AMyStackGameCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 void AMyStackGameCharacter::AddBlockToScene()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Added Block To Scene"));
-	ABlock* NewBlock = BlockPool->SpawnBlock();
+	ABlock* NewBlock = BP_BlockPool->SpawnBlock();
 
 	if (NewBlock)
 	{

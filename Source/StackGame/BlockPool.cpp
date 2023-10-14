@@ -33,23 +33,26 @@ void ABlockPool::InitializePool(int32 PoolSize)
 {
 	for (int i = 0; i < PoolSize; i++)
 	{
-		ABlock* NewBlock = GetWorld()->SpawnActor<ABlock>(FVector::ZeroVector, FRotator::ZeroRotator);
-		if (NewBlock)
+		if (BlockClass)
 		{
-			UStaticMeshComponent* NewBlockMeshComponent = NewBlock->FindComponentByClass<UStaticMeshComponent>();
-			if (NewBlockMeshComponent)
+			ABlock* NewBlock = GetWorld()->SpawnActor<ABlock>(BlockClass, FVector::ZeroVector, FRotator::ZeroRotator);
+			if (NewBlock)
 			{
-				UE_LOG(LogTemp, Log, TEXT("BlockMeshComponent found"));
+				/*UStaticMeshComponent* NewBlockMeshComponent = NewBlock->FindComponentByClass<UStaticMeshComponent>();
+				if (NewBlockMeshComponent)
+				{
+					UE_LOG(LogTemp, Log, TEXT("BlockMeshComponent found"));
 
-				NewBlockMeshComponent->SetStaticMesh(BlockMesh);
+					NewBlockMeshComponent->SetStaticMesh(BlockMesh);
+				}
+				else
+				{
+					UE_LOG(LogTemp, Log, TEXT("No BlockMeshComponent found"));
+				}*/
+				NewBlock->SetActorHiddenInGame(false);
+				NewBlock->SetInputEnabled(false);
+				BlockPool.Add(NewBlock);
 			}
-			else
-			{
-				UE_LOG(LogTemp, Log, TEXT("No BlockMeshComponent found"));
-			}
-			NewBlock->SetActorHiddenInGame(false);
-			NewBlock->SetInputEnabled(false);
-			BlockPool.Add(NewBlock);
 		}
 	}
 }
