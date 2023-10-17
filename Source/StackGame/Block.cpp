@@ -3,6 +3,7 @@
 
 #include "Block.h"
 #include <Kismet/GameplayStatics.h>
+#include "MyStackGameCharacter.h"
 
 // Sets default values
 ABlock::ABlock()
@@ -42,7 +43,11 @@ void ABlock::BeginPlay()
 	SplitBlockClass = ABlock::StaticClass();
 	PhysicsBlockClass = ABlock::StaticClass();
 
-	HandleInput();
+	PlayerCharacter = Cast<AMyStackGameCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+	if (!PlayerCharacter)
+	{
+		UE_LOG(LogTemp, Log, TEXT("MyStackGameCharacter not found"));
+	}
 }
 
 // Called every frame
@@ -58,36 +63,42 @@ void ABlock::Tick(float DeltaTime)
 	{
 		SetInputEnabled(false);
 	}
-
-	HandleInput();
 }
 
 void ABlock::HandleInput()
 {
-
-	// Bind the SplitBlock function to the space key press
-	APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-	if (PlayerController)
+	if (InputEnabled)
 	{
-		if (InputEnabled)
+		// Bind the SplitBlock function to the space key press
+		APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+		if (PlayerController)
 		{
 			PlayerController->InputComponent->BindAction("SplitBlock", IE_Pressed, this, &ABlock::SplitBlock);
-		}
-		else
-		{
-			PlayerController->InputComponent->ClearBindingsForObject(this);
 		}
 	}
 }
 
-void ABlock::SetYOffset(float NewYLocation)
+void ABlock::SetZOffSet(float NewZlocation)
 {
-	YOffset = NewYLocation;
+	ZOffset = NewZlocation;
+	UE_LOG(LogTemp, Log, TEXT("ZOffset Changed to: %f"), ZOffset);
+}
+
+void ABlock::SetStopMoving(bool FunctionStopMoving)
+{
+	StopMoving = FunctionStopMoving;
 }
 
 void ABlock::SetBlockMesh(UStaticMesh* FunctionBlockMesh)
 {
 	BlockMesh->SetStaticMesh(FunctionBlockMesh);
+
+}
+
+void ABlock::SetInputEnabled(bool Enabled)
+{
+	InputEnabled = Enabled;
+	HandleInput();
 }
 
 void ABlock::BlockOscillation(float DeltaTime)
@@ -96,7 +107,8 @@ void ABlock::BlockOscillation(float DeltaTime)
 
 	float OscillationValue = OscillationAmplitud * FMath::Sin(OscillationFrequency * TimeElapsed);
 
-	FVector NewLocation = FVector(OscillationValue, YOffset, 0.0f);
+	FVector NewLocation = FVector(OscillationValue, 0.0f, ZOffset);
+	UE_LOG(LogTemp, Log, TEXT("ZOffset in Oscillation: %f"), ZOffset);
 
 	SetActorLocation(NewLocation);
 }
@@ -139,6 +151,12 @@ void ABlock::SplitBlock()
 		UE_LOG(LogTemp, Log, TEXT("Box doesn't overlap"));
 		BlockMesh->SetSimulatePhysics(true);
 		StopMoving = true;
+	}
+
+	//When finished spliting block, add new block on top of this 
+	if (PlayerCharacter)
+	{
+		PlayerCharacter->AddBlockToScene();
 	}
 	
 }
@@ -184,9 +202,4 @@ void ABlock::ResizeBlock(ABlock* NewBlock, float NewWidth)
 	UE_LOG(LogTemp, Warning, TEXT("NewScale: %lf"), NewScale.X);
 
 	NewBlock->SetActorScale3D(NewScale);
-}
-
-void ABlock::SetInputEnabled(bool Enabled)
-{
-	InputEnabled = Enabled;
 }

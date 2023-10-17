@@ -17,6 +17,7 @@ void AMyStackGameCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
+	//Spawn in scene or world the BlockPool blueprint and then cast it to the ABlockPool class to access its functions
 	BP_BlockPool = GetWorld()->SpawnActor<ABlockPool>(BlockPoolClass, FVector::ZeroVector, FRotator::ZeroRotator);
 	if (BP_BlockPool)
 	{
@@ -31,7 +32,7 @@ void AMyStackGameCharacter::BeginPlay()
 	APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 	if (PlayerController)
 	{
-		PlayerController->InputComponent->BindAction("SplitBlock", IE_Released, this, &AMyStackGameCharacter::AddBlockToScene);
+		PlayerController->InputComponent->BindAction("AddBlock", IE_Pressed, this, &AMyStackGameCharacter::AddBlockToScene);
 	}
 }
 
@@ -51,13 +52,15 @@ void AMyStackGameCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 void AMyStackGameCharacter::AddBlockToScene()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Added Block To Scene"));
-	ABlock* NewBlock = BP_BlockPool->SpawnBlock();
+	ABlock* NewBlock = BlockPool->SpawnBlock();
 
 	if (NewBlock)
 	{
 		NewBlock->SetActorHiddenInGame(false);
-		NewBlock->SetInputEnabled(true);
-		NewBlock->SetYOffset(200.0f);
+		NewBlock->SetInputEnabled(true); //Bind input binding to SplitBlockFunction
+		NewBlock->SetStopMoving(false);
+		NewBlock->SetZOffSet(BlockZOffsetIncrement);
+		BlockZOffsetIncrement += 100;
 	}
 }
 

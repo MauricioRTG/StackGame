@@ -61,14 +61,17 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Spawning", meta = (AllowPrivateAccess = "true"))
 		float MinBoundsX;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawning", meta = (AllowPrivateAccess = "true"))
+		class AMyStackGameCharacter* PlayerCharacter;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Spawning", meta = (AllowPrivateAccess = "true"))
 		float MaxBoundsX;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
-		bool InputEnabled = true;
+		bool InputEnabled = false;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
-		float YOffset = 0.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement", meta = (AllowPrivateAccess = "true"))
+		float ZOffset;
 
 public: 
 	UFUNCTION()
@@ -90,7 +93,10 @@ public:
 		void HandleInput();
 
 	UFUNCTION()
-		void SetYOffset(float NewYLocation);
+		void SetStopMoving(bool FunctionStopMoving);
+
+	UFUNCTION()
+		void SetZOffSet(float NewZLocation);
 
 	UFUNCTION()
 		void SetBlockMesh(UStaticMesh* FunctionBlockMesh);

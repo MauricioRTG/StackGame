@@ -42,4 +42,7 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "BlockPool", meta = (AllowPrivateAccess = "true"))
 	int32 PoolSize = 1;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "BlockPool", meta = (AllowPrivateAccess = "true"))
+	float BlockZOffsetIncrement = 0;
+
 };
