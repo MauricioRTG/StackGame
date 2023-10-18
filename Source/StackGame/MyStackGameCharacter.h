@@ -28,7 +28,11 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	UFUNCTION()
-		void AddBlockToScene();
+	void AddBlockToScene();
+
+	UFUNCTION()
+	ABlockPool* GetBlockPool() const { return BlockPool; }
+
 private:
 	UPROPERTY()
 	ABlockPool* BlockPool;

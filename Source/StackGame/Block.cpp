@@ -2,6 +2,7 @@
 
 
 #include "Block.h"
+#include "BlockPool.h"
 #include <Kismet/GameplayStatics.h>
 #include "MyStackGameCharacter.h"
 
@@ -47,6 +48,12 @@ void ABlock::BeginPlay()
 	if (!PlayerCharacter)
 	{
 		UE_LOG(LogTemp, Log, TEXT("MyStackGameCharacter not found"));
+	}
+	
+	BlockPool = PlayerCharacter->GetBlockPool();
+	if (!BlockPool)
+	{
+		UE_LOG(LogTemp, Log, TEXT("BlockPool not found"));
 	}
 }
 
@@ -95,6 +102,11 @@ void ABlock::SetBlockMesh(UStaticMesh* FunctionBlockMesh)
 
 }
 
+UStaticMeshComponent* ABlock::GetBlockMeshComponent()
+{
+	return BlockMesh;
+}
+
 void ABlock::SetInputEnabled(bool Enabled)
 {
 	InputEnabled = Enabled;
@@ -117,7 +129,12 @@ void ABlock::SplitBlock()
 {
 	FVector BlockLocation = GetActorLocation();
 	float BoxSizeBound = BlockMesh->Bounds.BoxExtent.X * 2;
-	//If it goes to the left we choose the negative bound -100, else 100
+
+	if(BlockPool && BlockPool->TopBlock() != nullptr)
+	{
+		BoxSizeBound = BlockPool->TopBlock()->BlockMesh->Bounds.BoxExtent.X * 2;
+	}
+
 	UE_LOG(LogTemp, Log, TEXT("CurrentLocation: %lf"), BlockLocation.X);
 
 	//Split Block if it overlaps with the bottom block, if not let it fall
@@ -131,7 +148,7 @@ void ABlock::SplitBlock()
 		float OverlappingWidth = FMath::Abs(BlockLocation.X - BoxSizeBound);
 		FVector newLocation = FVector((BlockLocation.X / 2), BlockLocation.Y, BlockLocation.Z);
 		float newSize = OverlappingWidth / BoxSizeBound;
-		SpawnPhysicsBlock(newLocation, FVector(0.0f, 0.0f, 0.0f), false, newSize);
+		SpawnPhysicsBlock(newLocation, FVector(0.0f, 0.0f, 0.0f), false, newSize, true);
 
 		//Avoid spawning a second block when the original block is completly overlapping the bottom block
 		if (BlockLocation.X != 0)
@@ -140,10 +157,15 @@ void ABlock::SplitBlock()
 			float NonOverlappingWidth = (BlockMesh->Bounds.BoxExtent.X * 2) - OverlappingWidth;
 			FVector NonOverlappingBlockLocation = FVector(BlockLocation.X, BlockLocation.Y, BlockLocation.Z);
 			float NonOverlappingBlockSize = NonOverlappingWidth / BoxSizeBound;
-			SpawnPhysicsBlock(NonOverlappingBlockLocation, FVector(0.0f, 0.0f, 0.0f), true, NonOverlappingBlockSize);
+			SpawnPhysicsBlock(NonOverlappingBlockLocation, FVector(0.0f, 0.0f, 0.0f), true, NonOverlappingBlockSize, false);
 		}
-		
-		//Destroy original block
+
+		//Return block to the pool to make it hidden in scene, and we can use it later
+		/*ABlockPool* BlockPool = PlayerCharacter->GetBlockPool();
+		if (BlockPool)
+		{
+			BlockPool->ReturnToPool(this);
+		}*/
 		Destroy();
 	}
 	else
@@ -161,7 +183,7 @@ void ABlock::SplitBlock()
 	
 }
 
-void ABlock::SpawnPhysicsBlock(FVector SpawnLocation, FVector FunctionImpulseDirection, bool SimulatePhysics, float NewWidth)
+void ABlock::SpawnPhysicsBlock(FVector SpawnLocation, FVector FunctionImpulseDirection, bool SimulatePhysics, float NewWidth, bool AddToPool)
 {
 	StopMoving = true;
 
@@ -186,6 +208,11 @@ void ABlock::SpawnPhysicsBlock(FVector SpawnLocation, FVector FunctionImpulseDir
 		}
 
 		ResizeBlock(NewBlock, NewWidth);
+
+		if (BlockPool && AddToPool)
+		{
+			BlockPool->ReturnToPool(NewBlock, false, true);
+		}
 	}
 }
 

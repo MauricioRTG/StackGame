@@ -12,20 +12,45 @@ ABlockPool::ABlockPool()
 
 ABlock* ABlockPool::SpawnBlock()
 {
-	if (BlockPool.Num() > 0)
+	ABlock* BP_Block = GetWorld()->SpawnActor<ABlock>(BlockClass, FVector::ZeroVector, FRotator::ZeroRotator);
+
+	if (BP_Block)
 	{
-		return BlockPool.Pop();
+		ABlock* NewBlock = Cast<ABlock>(BP_Block);
+		//Resize Block to the same size as previous splited block
+		UStaticMeshComponent* NewBlockMeshComponent = NewBlock->GetBlockMeshComponent();
+		float TopBlockBoxSize = BlockPool.Top()->GetBlockMeshComponent()->Bounds.BoxExtent.X;
+		float NewSize = TopBlockBoxSize / NewBlockMeshComponent->Bounds.BoxExtent.X;
+		NewBlock->ResizeBlock(NewBlock, NewSize);
+
+		return NewBlock;
 	}
 	return nullptr;
 }
 
-void ABlockPool::ReturnToPool(ABlock* BlockToReturn)
+ABlock* ABlockPool::TopBlock()
+{
+	if (BlockPool.Num() > 0)
+	{
+		return BlockPool.Top(); //maybe Pop when there is a certain amount of blocks in scene
+	}
+	return nullptr;
+}
+
+void ABlockPool::ReturnToPool(ABlock* BlockToReturn, bool Hide, bool AddToPool)
 {
 	if (BlockToReturn)
 	{
-		BlockToReturn->SetActorHiddenInGame(true);
-		BlockToReturn->SetInputEnabled(false);
-		BlockPool.Add(BlockToReturn);
+		if (Hide)
+		{
+			BlockToReturn->SetActorHiddenInGame(true);
+			BlockToReturn->SetInputEnabled(false);
+			BlockToReturn->SetStopMoving(true);
+		}
+		if (AddToPool)
+		{
+			BlockPool.Add(BlockToReturn);
+		}
 	}
 }
 
@@ -43,8 +68,7 @@ void ABlockPool::InitializePool(int32 PoolSize)
 				NewBlock->SetInputEnabled(false);
 				NewBlock->SetStopMoving(true);
 				BlockPool.Add(NewBlock);
-			}
-			
+			}	
 		}
 	}
 }

@@ -67,6 +67,9 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Spawning", meta = (AllowPrivateAccess = "true"))
 		float MaxBoundsX;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Spawning", meta = (AllowPrivateAccess = "true"))
+		class ABlockPool* BlockPool;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
 		bool InputEnabled = false;
 
@@ -78,7 +81,7 @@ public:
 		void SplitBlock();
 
 	UFUNCTION()
-		void SpawnPhysicsBlock(FVector SpawnLocation, FVector FunctionImpulseDirection, bool SimulatePhysics, float NewWidth);
+		void SpawnPhysicsBlock(FVector SpawnLocation, FVector FunctionImpulseDirection, bool SimulatePhysics, float NewWidth, bool AddToPool);
 
 	UFUNCTION()
 		void ResizeBlock(ABlock* NewBlock, float NewWidth);
@@ -100,6 +103,9 @@ public:
 
 	UFUNCTION()
 		void SetBlockMesh(UStaticMesh* FunctionBlockMesh);
+
+	UFUNCTION()
+		UStaticMeshComponent* GetBlockMeshComponent();
 
 	//Impulse Strength when spliting
 	UPROPERTY(EditAnywhere, Category = "Spawning")

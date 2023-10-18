@@ -20,7 +20,10 @@ public:
 	ABlock* SpawnBlock();
 
 	UFUNCTION()
-	void ReturnToPool(ABlock* BlockToReturn);
+	ABlock* TopBlock();
+
+	UFUNCTION()
+	void ReturnToPool(ABlock* BlockToReturn, bool Hide, bool AddToPool);
 
 	UFUNCTION()
 	void InitializePool(int32 PoolSize);
