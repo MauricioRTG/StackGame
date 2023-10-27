@@ -22,6 +22,7 @@ ABlock* ABlockPool::SpawnBlock()
 		float TopBlockBoxSize = BlockPool.Top()->GetBlockMeshComponent()->Bounds.BoxExtent.X;
 		float NewSize = TopBlockBoxSize / NewBlockMeshComponent->Bounds.BoxExtent.X;
 		NewBlock->ResizeBlock(NewBlock, NewSize);
+		//NewBlock->GetBlockMeshComponent()->Bounds.BoxExtent.X = TopBlockBoxSize;
 
 		return NewBlock;
 	}

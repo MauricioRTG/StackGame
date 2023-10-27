@@ -120,7 +120,7 @@ void ABlock::BlockOscillation(float DeltaTime)
 	float OscillationValue = OscillationAmplitud * FMath::Sin(OscillationFrequency * TimeElapsed);
 
 	FVector NewLocation = FVector(OscillationValue, 0.0f, ZOffset);
-	UE_LOG(LogTemp, Log, TEXT("ZOffset in Oscillation: %f"), ZOffset);
+	//UE_LOG(LogTemp, Log, TEXT("ZOffset in Oscillation: %f"), ZOffset);
 
 	SetActorLocation(NewLocation);
 }
@@ -129,43 +129,49 @@ void ABlock::SplitBlock()
 {
 	FVector BlockLocation = GetActorLocation();
 	float BoxSizeBound = BlockMesh->Bounds.BoxExtent.X * 2;
+	ABlock* PreviousBlock;
+	float PreviousBlockXLocation = 0;
 
 	if(BlockPool && BlockPool->TopBlock() != nullptr)
 	{
-		BoxSizeBound = BlockPool->TopBlock()->BlockMesh->Bounds.BoxExtent.X * 2;
+		PreviousBlock = BlockPool->TopBlock();
+		BoxSizeBound = PreviousBlock->BlockMesh->Bounds.BoxExtent.X * 2;
+		PreviousBlockXLocation = PreviousBlock->GetActorLocation().X;
 	}
 
 	UE_LOG(LogTemp, Log, TEXT("CurrentLocation: %lf"), BlockLocation.X);
+	//UE_LOG(LogTemp, Log, TEXT("BoxSizeBound: %f"), BoxSizeBound);
+
+	//Calculate box bound offset according to resize orignial size is 1 
+	FVector CurrentScale = GetActorScale3D();
+	float BoxBoundsOffset = 10;
+	float CurrentBlockBoxSize = BlockMesh->Bounds.BoxExtent.X * 2;
 
 	//Split Block if it overlaps with the bottom block, if not let it fall
-	if (BlockLocation.X < BoxSizeBound && BlockLocation.X > -BoxSizeBound)
+	if (BlockLocation.X < (PreviousBlockXLocation + CurrentBlockBoxSize) && BlockLocation.X > (PreviousBlockXLocation - CurrentBlockBoxSize))
 	{
 		//If it goes to the right then the bound is 100, if its to the left the bound is -100
-		BoxSizeBound = (BlockLocation.X > 0 ? BoxSizeBound : -BoxSizeBound);
+		//BoxSizeBound = (BlockLocation.X > (BoxSizeBound + BoxBoundsOffset) / 2 ? (BoxSizeBound + BoxBoundsOffset) : (-BoxSizeBound + BoxBoundsOffset));
+		MaxBoundsX = (PreviousBlockXLocation + CurrentBlockBoxSize);
+		MinBoundsX = (PreviousBlockXLocation - CurrentBlockBoxSize);
 		UE_LOG(LogTemp, Log, TEXT("Box overlaps"));
 
 		//Spawn block that is the size of the overlapping region
-		float OverlappingWidth = FMath::Abs(BlockLocation.X - BoxSizeBound);
-		FVector newLocation = FVector((BlockLocation.X / 2), BlockLocation.Y, BlockLocation.Z);
+		float OverlappingWidth = FMath::Abs(GetActorLocation().X - (GetActorLocation().X < PreviousBlockXLocation ? MinBoundsX : MaxBoundsX));
+		FVector newLocation = FVector((GetActorLocation().X < PreviousBlockXLocation ? (MinBoundsX + OverlappingWidth) / 2.0f : (MaxBoundsX - OverlappingWidth) / 2.0f), BlockLocation.Y, BlockLocation.Z);
 		float newSize = OverlappingWidth / BoxSizeBound;
 		SpawnPhysicsBlock(newLocation, FVector(0.0f, 0.0f, 0.0f), false, newSize, true);
 
 		//Avoid spawning a second block when the original block is completly overlapping the bottom block
-		if (BlockLocation.X != 0)
+		if (BlockLocation.X != PreviousBlockXLocation)
 		{
 			//Spawn block that is the size of the non overlapping region
 			float NonOverlappingWidth = (BlockMesh->Bounds.BoxExtent.X * 2) - OverlappingWidth;
-			FVector NonOverlappingBlockLocation = FVector(BlockLocation.X, BlockLocation.Y, BlockLocation.Z);
+			FVector NonOverlappingBlockLocation = FVector((GetActorLocation().X < PreviousBlockXLocation ? (MinBoundsX + NonOverlappingWidth) / 2.0f : (MaxBoundsX - NonOverlappingWidth) / 2.0f), BlockLocation.Y, BlockLocation.Z);
 			float NonOverlappingBlockSize = NonOverlappingWidth / BoxSizeBound;
 			SpawnPhysicsBlock(NonOverlappingBlockLocation, FVector(0.0f, 0.0f, 0.0f), true, NonOverlappingBlockSize, false);
 		}
-
-		//Return block to the pool to make it hidden in scene, and we can use it later
-		/*ABlockPool* BlockPool = PlayerCharacter->GetBlockPool();
-		if (BlockPool)
-		{
-			BlockPool->ReturnToPool(this);
-		}*/
+		//Destroy original block
 		Destroy();
 	}
 	else
@@ -208,6 +214,7 @@ void ABlock::SpawnPhysicsBlock(FVector SpawnLocation, FVector FunctionImpulseDir
 		}
 
 		ResizeBlock(NewBlock, NewWidth);
+		UE_LOG(LogTemp, Log, TEXT("New BoxSizeBound: %f"), NewBlock->BlockMesh->Bounds.BoxExtent.X * 2);
 
 		if (BlockPool && AddToPool)
 		{

@@ -40,10 +40,10 @@ private:
 	UPROPERTY()
 	ABlockPool* BP_BlockPool;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "BlockPool", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "BlockPool", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<ABlockPool> BlockPoolClass;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "BlockPool", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BlockPool", meta = (AllowPrivateAccess = "true"))
 	int32 PoolSize = 1;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "BlockPool", meta = (AllowPrivateAccess = "true"))
