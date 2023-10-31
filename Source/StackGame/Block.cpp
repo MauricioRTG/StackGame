@@ -151,8 +151,11 @@ void ABlock::SplitBlock()
 	if (BlockLocation.X < (PreviousBlockXLocation + CurrentBlockBoxSize) && BlockLocation.X > (PreviousBlockXLocation - CurrentBlockBoxSize))
 	{
 		//If it goes to the right then the bound is 100, if its to the left the bound is -100
+		
 		MaxBoundsX = (PreviousBlockXLocation + CurrentBlockBoxSize);
 		MinBoundsX = (PreviousBlockXLocation - CurrentBlockBoxSize);
+		
+		
 		UE_LOG(LogTemp, Log, TEXT("////Box overlaps"));
 		UE_LOG(LogTemp, Log, TEXT("MinBoundsX: %f"), MinBoundsX);
 		UE_LOG(LogTemp, Log, TEXT("MaxBoundsX: %f"), MaxBoundsX);
@@ -165,7 +168,7 @@ void ABlock::SplitBlock()
 		//Spawn block that is the size of the overlapping region
 		float InsideBlockEdge = (BlockLocation.X < PreviousBlockXLocation ? BlockLocation.X + BlockMesh->Bounds.BoxExtent.X : BlockLocation.X - BlockMesh->Bounds.BoxExtent.X);
 		UE_LOG(LogTemp, Log, TEXT("InsideBlockEdge: %f"), InsideBlockEdge);
-		float OverlappingWidth = FMath::Abs(BlockLocation.X - (BlockLocation.X < PreviousBlockXLocation ? MinBoundsX : MaxBoundsX));
+		float OverlappingWidth = FMath::Abs(InsideBlockEdge - (BlockLocation.X < PreviousBlockXLocation ? (MinBoundsX /2) : (MaxBoundsX / 2)));
 		UE_LOG(LogTemp, Log, TEXT("OverlappingWidth: %f"), OverlappingWidth);
 		FVector newLocation = FVector((BlockLocation.X < PreviousBlockXLocation ? InsideBlockEdge - (OverlappingWidth /2) : InsideBlockEdge + (OverlappingWidth /2)), BlockLocation.Y, BlockLocation.Z);
 		UE_LOG(LogTemp, Log, TEXT("NewLocation: %f"), newLocation.X);
@@ -181,6 +184,7 @@ void ABlock::SplitBlock()
 			float OutsideBlockEdge = (BlockLocation.X < PreviousBlockXLocation ? BlockLocation.X - BlockMesh->Bounds.BoxExtent.X : BlockLocation.X + BlockMesh->Bounds.BoxExtent.X);
 			UE_LOG(LogTemp, Log, TEXT("OutsideBlockEdge: %f"), OutsideBlockEdge);
 			float NonOverlappingWidth = (BlockMesh->Bounds.BoxExtent.X * 2) - OverlappingWidth;
+			//float NonOverlappingWidth = FMath::Abs(OutsideBlockEdge - (OutsideBlockEdge < PreviousBlockXLocation ? MinBoundsX : MaxBoundsX));
 			UE_LOG(LogTemp, Log, TEXT("NonOverlappingWidth: %f"), NonOverlappingWidth);
 			FVector NonOverlappingBlockLocation = FVector((BlockLocation.X < PreviousBlockXLocation ? OutsideBlockEdge + (NonOverlappingWidth / 2) : OutsideBlockEdge - (NonOverlappingWidth / 2)), BlockLocation.Y, BlockLocation.Z);
 			UE_LOG(LogTemp, Log, TEXT("NonOverlappingBlockLocation: %f"), NonOverlappingBlockLocation.X);

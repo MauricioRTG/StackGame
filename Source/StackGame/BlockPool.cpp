@@ -19,9 +19,11 @@ ABlock* ABlockPool::SpawnBlock()
 		ABlock* NewBlock = Cast<ABlock>(BP_Block);
 		//Resize Block to the same size as previous splited block
 		UStaticMeshComponent* NewBlockMeshComponent = NewBlock->GetBlockMeshComponent();
-		float TopBlockBoxSize = BlockPool.Top()->GetBlockMeshComponent()->Bounds.BoxExtent.X;
+		float CurrentXScale = TopBlock()->GetActorScale3D().X;
+		NewBlock->ResizeBlock(NewBlock, CurrentXScale);
+		/*float TopBlockBoxSize = BlockPool.Top()->GetBlockMeshComponent()->Bounds.BoxExtent.X;
 		float NewSize = TopBlockBoxSize / NewBlockMeshComponent->Bounds.BoxExtent.X;
-		NewBlock->ResizeBlock(NewBlock, NewSize);
+		NewBlock->ResizeBlock(NewBlock, NewSize);*/
 		//NewBlock->GetBlockMeshComponent()->Bounds.BoxExtent.X = TopBlockBoxSize;
 
 		return NewBlock;
