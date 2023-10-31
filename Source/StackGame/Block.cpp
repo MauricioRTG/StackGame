@@ -120,7 +120,6 @@ void ABlock::BlockOscillation(float DeltaTime)
 	float OscillationValue = OscillationAmplitud * FMath::Sin(OscillationFrequency * TimeElapsed);
 
 	FVector NewLocation = FVector(OscillationValue, 0.0f, ZOffset);
-	//UE_LOG(LogTemp, Log, TEXT("ZOffset in Oscillation: %f"), ZOffset);
 
 	SetActorLocation(NewLocation);
 }
@@ -128,69 +127,50 @@ void ABlock::BlockOscillation(float DeltaTime)
 void ABlock::SplitBlock()
 {
 	FVector BlockLocation = GetActorLocation();
-	float BoxSizeBound = BlockMesh->Bounds.BoxExtent.X * 2;
+	float PreviousBoxSizeBound = BlockMesh->Bounds.BoxExtent.X * 2;
 	ABlock* PreviousBlock;
-	float PreviousBlockXLocation = 0;
+	FVector PreviousBlockLocation = FVector::ZeroVector;
 
+	//Get previous block
 	if(BlockPool && BlockPool->TopBlock() != nullptr)
 	{
 		PreviousBlock = BlockPool->TopBlock();
-		BoxSizeBound = PreviousBlock->BlockMesh->Bounds.BoxExtent.X * 2;
-		PreviousBlockXLocation = PreviousBlock->GetActorLocation().X;
+		PreviousBoxSizeBound = PreviousBlock->BlockMesh->Bounds.BoxExtent.X * 2;
+		PreviousBlockLocation = PreviousBlock->GetActorLocation();
 	}
 
 	UE_LOG(LogTemp, Log, TEXT("CurrentLocation: %lf"), BlockLocation.X);
-	//UE_LOG(LogTemp, Log, TEXT("BoxSizeBound: %f"), BoxSizeBound);
 
-	//Calculate box bound offset according to resize orignial size is 1 
-	FVector CurrentScale = GetActorScale3D();
-	float BoxBoundsOffset = 10;
+	//Block Size
 	float CurrentBlockBoxSize = BlockMesh->Bounds.BoxExtent.X * 2;
 
 	//Split Block if it overlaps with the bottom block, if not let it fall
-	if (BlockLocation.X < (PreviousBlockXLocation + CurrentBlockBoxSize) && BlockLocation.X > (PreviousBlockXLocation - CurrentBlockBoxSize))
+	if (BlockLocation.X < (PreviousBlockLocation.X + CurrentBlockBoxSize) && BlockLocation.X > (PreviousBlockLocation.X - CurrentBlockBoxSize))
 	{
-		//If it goes to the right then the bound is 100, if its to the left the bound is -100
-		
-		MaxBoundsX = (PreviousBlockXLocation + CurrentBlockBoxSize);
-		MinBoundsX = (PreviousBlockXLocation - CurrentBlockBoxSize);
+		//Calculate Bounds from previous block
+		MaxBoundsX = (PreviousBlockLocation.X + CurrentBlockBoxSize);
+		MinBoundsX = (PreviousBlockLocation.X - CurrentBlockBoxSize);
 		
 		
 		UE_LOG(LogTemp, Log, TEXT("////Box overlaps"));
 		UE_LOG(LogTemp, Log, TEXT("MinBoundsX: %f"), MinBoundsX);
 		UE_LOG(LogTemp, Log, TEXT("MaxBoundsX: %f"), MaxBoundsX);
-		BoxSizeBound = (BlockLocation.X < PreviousBlockXLocation ? -BoxSizeBound : BoxSizeBound );
-		UE_LOG(LogTemp, Log, TEXT("BoxSizeBound: %f"), BoxSizeBound);
-		UE_LOG(LogTemp, Log, TEXT("PreviousBlockXLocation: %f"), PreviousBlockXLocation);
+
+		//If it goes to the right then the bound is 100, if its to the left the bound is -100
+		PreviousBoxSizeBound = (BlockLocation.X < PreviousBlockLocation.X ? -PreviousBoxSizeBound : PreviousBoxSizeBound );
+
+		UE_LOG(LogTemp, Log, TEXT("BoxSizeBound: %f"), PreviousBoxSizeBound);
+		UE_LOG(LogTemp, Log, TEXT("PreviousBlockXLocation: %f"), PreviousBlockLocation.X);
 
 		
-		UE_LOG(LogTemp, Log, TEXT("//Overlapping Region"));
-		//Spawn block that is the size of the overlapping region
-		float InsideBlockEdge = (BlockLocation.X < PreviousBlockXLocation ? BlockLocation.X + BlockMesh->Bounds.BoxExtent.X : BlockLocation.X - BlockMesh->Bounds.BoxExtent.X);
-		UE_LOG(LogTemp, Log, TEXT("InsideBlockEdge: %f"), InsideBlockEdge);
-		float OverlappingWidth = FMath::Abs(InsideBlockEdge - (BlockLocation.X < PreviousBlockXLocation ? (MinBoundsX /2) : (MaxBoundsX / 2)));
-		UE_LOG(LogTemp, Log, TEXT("OverlappingWidth: %f"), OverlappingWidth);
-		FVector newLocation = FVector((BlockLocation.X < PreviousBlockXLocation ? InsideBlockEdge - (OverlappingWidth /2) : InsideBlockEdge + (OverlappingWidth /2)), BlockLocation.Y, BlockLocation.Z);
-		UE_LOG(LogTemp, Log, TEXT("NewLocation: %f"), newLocation.X);
-		float newSize = OverlappingWidth / BoxSizeBound;
-		UE_LOG(LogTemp, Log, TEXT("NewSize: %f"), newSize);
-		SpawnPhysicsBlock(newLocation, FVector(0.0f, 0.0f, 0.0f), false, newSize, true);
+		//Spawn block that is the size of the overlapping region and return overlapping width
+		float OverlappingWidth = SpawnOverlappingBlock(BlockLocation, PreviousBlockLocation, PreviousBoxSizeBound);
 
 		//Avoid spawning a second block when the original block is completly overlapping the bottom block
-		if (BlockLocation.X != PreviousBlockXLocation)
+		if (BlockLocation.X != PreviousBlockLocation.X)
 		{
-			UE_LOG(LogTemp, Log, TEXT("NonOverlapping Region"));
 			//Spawn block that is the size of the non overlapping region
-			float OutsideBlockEdge = (BlockLocation.X < PreviousBlockXLocation ? BlockLocation.X - BlockMesh->Bounds.BoxExtent.X : BlockLocation.X + BlockMesh->Bounds.BoxExtent.X);
-			UE_LOG(LogTemp, Log, TEXT("OutsideBlockEdge: %f"), OutsideBlockEdge);
-			float NonOverlappingWidth = (BlockMesh->Bounds.BoxExtent.X * 2) - OverlappingWidth;
-			//float NonOverlappingWidth = FMath::Abs(OutsideBlockEdge - (OutsideBlockEdge < PreviousBlockXLocation ? MinBoundsX : MaxBoundsX));
-			UE_LOG(LogTemp, Log, TEXT("NonOverlappingWidth: %f"), NonOverlappingWidth);
-			FVector NonOverlappingBlockLocation = FVector((BlockLocation.X < PreviousBlockXLocation ? OutsideBlockEdge + (NonOverlappingWidth / 2) : OutsideBlockEdge - (NonOverlappingWidth / 2)), BlockLocation.Y, BlockLocation.Z);
-			UE_LOG(LogTemp, Log, TEXT("NonOverlappingBlockLocation: %f"), NonOverlappingBlockLocation.X);
-			float NonOverlappingBlockSize = NonOverlappingWidth / BoxSizeBound;
-			UE_LOG(LogTemp, Log, TEXT("NonOverlappingBlockSize: %f"), NonOverlappingBlockSize);
-			SpawnPhysicsBlock(NonOverlappingBlockLocation, FVector(0.0f, 0.0f, 0.0f), true, NonOverlappingBlockSize, false);
+			SpawnNonOverlappingBlock(BlockLocation, PreviousBlockLocation, PreviousBoxSizeBound, OverlappingWidth);
 		}
 		//Destroy original block
 		Destroy();
@@ -208,6 +188,36 @@ void ABlock::SplitBlock()
 		PlayerCharacter->AddBlockToScene();
 	}
 	
+}
+
+float ABlock::SpawnOverlappingBlock(FVector CurrentBlockLocation, FVector PreviousBlockLocation, float PreviousBoxSizeBound)
+{
+	UE_LOG(LogTemp, Log, TEXT("//Overlapping Region"));
+	float InsideBlockEdge = (CurrentBlockLocation.X < PreviousBlockLocation.X ? CurrentBlockLocation.X + BlockMesh->Bounds.BoxExtent.X : CurrentBlockLocation.X - BlockMesh->Bounds.BoxExtent.X);
+	UE_LOG(LogTemp, Log, TEXT("InsideBlockEdge: %f"), InsideBlockEdge);
+	float OverlappingWidth = FMath::Abs(InsideBlockEdge - (CurrentBlockLocation.X < PreviousBlockLocation.X ? (MinBoundsX / 2) : (MaxBoundsX / 2)));
+	UE_LOG(LogTemp, Log, TEXT("OverlappingWidth: %f"), OverlappingWidth);
+	FVector newLocation = FVector((CurrentBlockLocation.X < PreviousBlockLocation.X ? InsideBlockEdge - (OverlappingWidth / 2) : InsideBlockEdge + (OverlappingWidth / 2)), CurrentBlockLocation.Y, CurrentBlockLocation.Z);
+	UE_LOG(LogTemp, Log, TEXT("NewLocation: %f"), newLocation.X);
+	float newSize = OverlappingWidth / PreviousBoxSizeBound;
+	UE_LOG(LogTemp, Log, TEXT("NewSize: %f"), newSize);
+	SpawnPhysicsBlock(newLocation, FVector(0.0f, 0.0f, 0.0f), false, newSize, true);
+
+	return OverlappingWidth;
+}
+
+void ABlock::SpawnNonOverlappingBlock(FVector CurrentBlockLocation, FVector PreviousBlockLocation, float PreviousBoxSizeBound, float OverlappingWidth)
+{
+	UE_LOG(LogTemp, Log, TEXT("NonOverlapping Region"));
+	float OutsideBlockEdge = (CurrentBlockLocation.X < PreviousBlockLocation.X ? CurrentBlockLocation.X - BlockMesh->Bounds.BoxExtent.X : CurrentBlockLocation.X + BlockMesh->Bounds.BoxExtent.X);
+	UE_LOG(LogTemp, Log, TEXT("OutsideBlockEdge: %f"), OutsideBlockEdge);
+	float NonOverlappingWidth = (BlockMesh->Bounds.BoxExtent.X * 2) - OverlappingWidth;
+	UE_LOG(LogTemp, Log, TEXT("NonOverlappingWidth: %f"), NonOverlappingWidth);
+	FVector NonOverlappingBlockLocation = FVector((CurrentBlockLocation.X < PreviousBlockLocation.X ? OutsideBlockEdge + (NonOverlappingWidth / 2) : OutsideBlockEdge - (NonOverlappingWidth / 2)), CurrentBlockLocation.Y, CurrentBlockLocation.Z);
+	UE_LOG(LogTemp, Log, TEXT("NonOverlappingBlockLocation: %f"), NonOverlappingBlockLocation.X);
+	float NonOverlappingBlockSize = NonOverlappingWidth / PreviousBoxSizeBound;
+	UE_LOG(LogTemp, Log, TEXT("NonOverlappingBlockSize: %f"), NonOverlappingBlockSize);
+	SpawnPhysicsBlock(NonOverlappingBlockLocation, FVector(0.0f, 0.0f, 0.0f), true, NonOverlappingBlockSize, false);
 }
 
 void ABlock::SpawnPhysicsBlock(FVector SpawnLocation, FVector FunctionImpulseDirection, bool SimulatePhysics, float NewWidth, bool AddToPool)

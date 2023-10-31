@@ -81,6 +81,12 @@ public:
 		void SplitBlock();
 
 	UFUNCTION()
+		float SpawnOverlappingBlock(FVector CurrentBlockLocation, FVector PreviousBlockLocation, float PreviousBoxSizeBound);
+
+	UFUNCTION()
+		void SpawnNonOverlappingBlock(FVector CurrentBlockLocation, FVector PreviousBlockLocation, float PreviousBoxSizeBound, float OverlappingWidth);
+
+	UFUNCTION()
 		void SpawnPhysicsBlock(FVector SpawnLocation, FVector FunctionImpulseDirection, bool SimulatePhysics, float NewWidth, bool AddToPool);
 
 	UFUNCTION()
