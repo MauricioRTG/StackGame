@@ -3,6 +3,7 @@
 
 #include "MyStackGameCharacter.h"
 #include <Kismet/GameplayStatics.h>
+#include "Camera/CameraComponent.h"
 #include "MyStackGamePlayerController.h"
 
 // Sets default values
@@ -10,6 +11,9 @@ AMyStackGameCharacter::AMyStackGameCharacter()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
+	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
+	RootComponent = CameraComponent;
 }
 
 // Called when the game starts or when spawned
@@ -34,6 +38,9 @@ void AMyStackGameCharacter::BeginPlay()
 	{
 		PlayerController->InputComponent->BindAction("AddBlock", IE_Pressed, this, &AMyStackGameCharacter::AddBlockToScene);
 	}
+
+	//Set Camera rotation
+	SetActorRotation(CameraRotation);
 }
 
 // Called every frame
@@ -59,8 +66,16 @@ void AMyStackGameCharacter::AddBlockToScene()
 		NewBlock->SetActorHiddenInGame(false);
 		NewBlock->SetInputEnabled(true); //Bind input binding to SplitBlockFunction
 		NewBlock->SetStopMoving(false);
-		NewBlock->SetZOffSet(BlockZOffsetIncrement);
-		BlockZOffsetIncrement += 100;
+		NewBlock->SetZOffSet(BlockZOffset);
+		BlockZOffset += BlockZOffsetIncrement;
+		UpdateCamaraLocation(NewBlock);
 	}
+}
+
+void AMyStackGameCharacter::UpdateCamaraLocation(ABlock* NewBlock)
+{
+	CameraZOffset += CameraZOffsetIncrement;
+	FVector NewCamaraLocation = FVector(GetActorLocation().X, GetActorLocation().Y, CameraZOffset);
+	SetActorLocation(NewCamaraLocation);
 }
 

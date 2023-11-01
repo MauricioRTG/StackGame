@@ -47,6 +47,23 @@ private:
 	int32 PoolSize = 1;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "BlockPool", meta = (AllowPrivateAccess = "true"))
-	float BlockZOffsetIncrement = 0;
+	float BlockZOffset = 0.0f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BlockPool", meta = (AllowPrivateAccess = "true"))
+	float BlockZOffsetIncrement = 100.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera", meta = (AllowPrivateAccess = "true"))
+	float CameraZOffset = 0.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera", meta = (AllowPrivateAccess = "true"))
+	float CameraZOffsetIncrement = 100.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera", meta = (AllowPrivateAccess = "true"))
+	FRotator CameraRotation;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
+	class UCameraComponent* CameraComponent;
+
+	UFUNCTION()
+	void UpdateCamaraLocation(ABlock* NewBlock);
 };
