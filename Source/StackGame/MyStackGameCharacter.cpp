@@ -5,6 +5,7 @@
 #include <Kismet/GameplayStatics.h>
 #include "Camera/CameraComponent.h"
 #include "MyStackGamePlayerController.h"
+#include "HUDScore.h"
 
 // Sets default values
 AMyStackGameCharacter::AMyStackGameCharacter()
@@ -20,6 +21,17 @@ AMyStackGameCharacter::AMyStackGameCharacter()
 void AMyStackGameCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	//Initialize score
+	Score = 0;
+
+	//Set Socore Widget
+	UHUDScore* ScoreWidget = CreateWidget<UHUDScore>(GetWorld(), HUDScoreClass);
+	//Add widget to viewport and update score text to 0
+	if (ScoreWidget)
+	{
+		ScoreWidget->AddToViewport();
+	}
 
 	//Spawn in scene or world the BlockPool blueprint and then cast it to the ABlockPool class to access its functions
 	BP_BlockPool = GetWorld()->SpawnActor<ABlockPool>(BlockPoolClass, FVector::ZeroVector, FRotator::ZeroRotator);
@@ -69,7 +81,13 @@ void AMyStackGameCharacter::AddBlockToScene()
 		NewBlock->SetZOffSet(BlockZOffset);
 		BlockZOffset += BlockZOffsetIncrement;
 		UpdateCamaraLocation(NewBlock);
+		UpdateScore(1);
 	}
+}
+
+void AMyStackGameCharacter::UpdateScore(int32 Value)
+{
+	Score += Value;
 }
 
 void AMyStackGameCharacter::UpdateCamaraLocation(ABlock* NewBlock)

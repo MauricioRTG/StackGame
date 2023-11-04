@@ -33,6 +33,12 @@ public:
 	UFUNCTION()
 	ABlockPool* GetBlockPool() const { return BlockPool; }
 
+	UFUNCTION()
+	int32 GetScore() { return Score; }
+
+	UFUNCTION()
+	void UpdateScore(int32 NewScore);
+
 private:
 	UPROPERTY()
 	ABlockPool* BlockPool;
@@ -64,6 +70,12 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* CameraComponent;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI", meta = (AllowPrivateAccess))
+	TSubclassOf<class UUserWidget> HUDScoreClass;
+
 	UFUNCTION()
 	void UpdateCamaraLocation(ABlock* NewBlock);
+
+	UPROPERTY()
+		int32 Score;
 };
