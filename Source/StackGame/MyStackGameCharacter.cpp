@@ -6,6 +6,7 @@
 #include "Camera/CameraComponent.h"
 #include "MyStackGamePlayerController.h"
 #include "HUDScore.h"
+#include "HUDMainMenu.h"
 
 // Sets default values
 AMyStackGameCharacter::AMyStackGameCharacter()
@@ -22,15 +23,11 @@ void AMyStackGameCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	//Initialize score
-	Score = 0;
-
-	//Set Socore Widget
-	UHUDScore* ScoreWidget = CreateWidget<UHUDScore>(GetWorld(), HUDScoreClass);
-	//Add widget to viewport and update score text to 0
-	if (ScoreWidget)
+	//Bind AddBlock to player controller
+	PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+	if (PlayerController)
 	{
-		ScoreWidget->AddToViewport();
+		PlayerController->InputComponent->BindAction("AddBlock", IE_Pressed, this, &AMyStackGameCharacter::AddBlockToScene);
 	}
 
 	//Spawn in scene or world the BlockPool blueprint and then cast it to the ABlockPool class to access its functions
@@ -43,16 +40,23 @@ void AMyStackGameCharacter::BeginPlay()
 			BlockPool->InitializePool(PoolSize);
 		}
 	}
-	
-	//To avoid handling in player controller, because is not a complex logic
-	APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-	if (PlayerController)
-	{
-		PlayerController->InputComponent->BindAction("AddBlock", IE_Pressed, this, &AMyStackGameCharacter::AddBlockToScene);
-	}
 
+	//Initialize score
+	Score = 0;
+	
 	//Set Camera rotation
 	SetActorRotation(CameraRotation);
+
+	//Add Main menu widget to viewport
+	UHUDMainMenu* MainMenuWidget = CreateWidget<UHUDMainMenu>(GetWorld(), HUDMainMenuClass);
+	if (MainMenuWidget)
+	{
+		MainMenuWidget->AddToViewport();
+		//Set Game to be paused
+		UGameplayStatics::SetGamePaused(GetWorld(), true);
+		PlayerController->SetInputMode(FInputModeGameAndUI());
+		PlayerController->bShowMouseCursor = true;
+	}
 }
 
 // Called every frame
@@ -88,6 +92,17 @@ void AMyStackGameCharacter::AddBlockToScene()
 void AMyStackGameCharacter::UpdateScore(int32 Value)
 {
 	Score += Value;
+}
+
+void AMyStackGameCharacter::CreateScoreWidget()
+{
+	//Set Socore Widget
+	UHUDScore* ScoreWidget = CreateWidget<UHUDScore>(GetWorld(), HUDScoreClass);
+	//Add widget to viewport and update score text to 0
+	if (ScoreWidget)
+	{
+		ScoreWidget->AddToViewport();
+	}
 }
 
 void AMyStackGameCharacter::UpdateCamaraLocation(ABlock* NewBlock)

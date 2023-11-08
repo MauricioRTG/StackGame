@@ -39,6 +39,9 @@ public:
 	UFUNCTION()
 	void UpdateScore(int32 NewScore);
 
+	UFUNCTION()
+	void CreateScoreWidget();
+
 private:
 	UPROPERTY()
 	ABlockPool* BlockPool;
@@ -78,4 +81,11 @@ private:
 
 	UPROPERTY()
 		int32 Score;
+
+	/* Main Menu Widget*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<class UUserWidget> HUDMainMenuClass;
+
+	UPROPERTY()
+	APlayerController* PlayerController;
 };
