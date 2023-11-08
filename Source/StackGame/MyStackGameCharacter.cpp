@@ -53,7 +53,7 @@ void AMyStackGameCharacter::BeginPlay()
 	{
 		MainMenuWidget->AddToViewport();
 		//Set Game to be paused
-		UGameplayStatics::SetGamePaused(GetWorld(), true);
+		//UGameplayStatics::SetGamePaused(GetWorld(), true);
 		PlayerController->SetInputMode(FInputModeGameAndUI());
 		PlayerController->bShowMouseCursor = true;
 	}

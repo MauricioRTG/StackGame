@@ -16,7 +16,7 @@ void UHUDMainMenu::NativeConstruct()
 void UHUDMainMenu::OnPlayButtonClicked()
 {
 	//Set game to a paused state
-	UGameplayStatics::SetGamePaused(GetWorld(), false);
+	//UGameplayStatics::SetGamePaused(GetWorld(), false);
 
 	APlayerController* PlayerController =  UGameplayStatics::GetPlayerController(GetWorld(), 0);
 	
@@ -33,8 +33,6 @@ void UHUDMainMenu::OnPlayButtonClicked()
 		//Add block to scene
 		PlayerCharacter->AddBlockToScene();
 	}
-
-
 
 	//Remove widget from viewport
 	this->RemoveFromParent();
