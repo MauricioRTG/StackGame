@@ -42,6 +42,9 @@ public:
 	UFUNCTION()
 	void CreateScoreWidget();
 
+	UFUNCTION()
+	void CreateEndGameWidget();
+
 private:
 	UPROPERTY()
 	ABlockPool* BlockPool;
@@ -80,7 +83,7 @@ private:
 	void UpdateCamaraLocation(ABlock* NewBlock);
 
 	UPROPERTY()
-		int32 Score;
+	int32 Score;
 
 	/* Main Menu Widget*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI", meta = (AllowPrivateAccess = "true"))
@@ -88,4 +91,8 @@ private:
 
 	UPROPERTY()
 	APlayerController* PlayerController;
+
+	/* End Game Widget*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<class UUserWidget> HUDEndGameClass;
 };

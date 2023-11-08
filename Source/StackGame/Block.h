@@ -76,6 +76,9 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement", meta = (AllowPrivateAccess = "true"))
 		float ZOffset;
 
+	UPROPERTY()
+		APlayerController* PlayerController;
+
 public: 
 	UFUNCTION()
 		void SplitBlock();

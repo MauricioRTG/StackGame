@@ -7,6 +7,7 @@
 #include "MyStackGamePlayerController.h"
 #include "HUDScore.h"
 #include "HUDMainMenu.h"
+#include "HUDEndGame.h"
 
 // Sets default values
 AMyStackGameCharacter::AMyStackGameCharacter()
@@ -54,7 +55,7 @@ void AMyStackGameCharacter::BeginPlay()
 		MainMenuWidget->AddToViewport();
 		//Set Game to be paused
 		//UGameplayStatics::SetGamePaused(GetWorld(), true);
-		PlayerController->SetInputMode(FInputModeGameAndUI());
+		PlayerController->SetInputMode(FInputModeUIOnly());
 		PlayerController->bShowMouseCursor = true;
 	}
 }
@@ -85,7 +86,6 @@ void AMyStackGameCharacter::AddBlockToScene()
 		NewBlock->SetZOffSet(BlockZOffset);
 		BlockZOffset += BlockZOffsetIncrement;
 		UpdateCamaraLocation(NewBlock);
-		UpdateScore(1);
 	}
 }
 
@@ -102,6 +102,16 @@ void AMyStackGameCharacter::CreateScoreWidget()
 	if (ScoreWidget)
 	{
 		ScoreWidget->AddToViewport();
+	}
+}
+
+void AMyStackGameCharacter::CreateEndGameWidget()
+{
+	UHUDEndGame* EndGameWidget = CreateWidget<UHUDEndGame>(GetWorld(), HUDEndGameClass);
+
+	if (EndGameWidget)
+	{
+		EndGameWidget->AddToViewport();
 	}
 }
 

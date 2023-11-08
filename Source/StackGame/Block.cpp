@@ -77,7 +77,7 @@ void ABlock::HandleInput()
 	if (InputEnabled)
 	{
 		// Bind the SplitBlock function to the space key press
-		APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+		PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 		if (PlayerController)
 		{
 			PlayerController->InputComponent->BindAction("SplitBlock", IE_Pressed, this, &ABlock::SplitBlock);
@@ -174,20 +174,33 @@ void ABlock::SplitBlock()
 		}
 		//Destroy original block
 		Destroy();
+
+		//When finished spliting block, add new block on top of this 
+		if (PlayerCharacter)
+		{
+			PlayerCharacter->UpdateScore(1);
+			PlayerCharacter->AddBlockToScene();
+		}
 	}
 	else
 	{
+		//Let the block fall when is outside boundaries
 		UE_LOG(LogTemp, Log, TEXT("Box doesn't overlap"));
 		BlockMesh->SetSimulatePhysics(true);
 		StopMoving = true;
-	}
 
-	//When finished spliting block, add new block on top of this 
-	if (PlayerCharacter)
-	{
-		PlayerCharacter->AddBlockToScene();
+		//Add the End Game widget to the viewport
+		if (PlayerCharacter)
+		{
+			PlayerCharacter->CreateEndGameWidget();
+			//Set input mode to only let the user interact with the UI elements
+			if (PlayerController)
+			{
+				PlayerController->SetInputMode(FInputModeUIOnly());
+				PlayerController->bShowMouseCursor = true;
+			}
+		}
 	}
-	
 }
 
 float ABlock::SpawnOverlappingBlock(FVector CurrentBlockLocation, FVector PreviousBlockLocation, float PreviousBoxSizeBound)
