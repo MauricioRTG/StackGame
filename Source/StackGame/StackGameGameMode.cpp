@@ -11,7 +11,7 @@
 AStackGameGameMode::AStackGameGameMode()
 {
 	// use our custom PlayerController class
-	PlayerControllerClass = AMyStackGamePlayerController::StaticClass();
+	//PlayerControllerClass = AMyStackGamePlayerController::StaticClass();
 	//DefaultPawnClass = AMyStackGameCharacter::StaticClass();
 
 	//set default pawn class to our Blueprinted character

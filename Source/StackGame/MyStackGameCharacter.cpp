@@ -8,6 +8,7 @@
 #include "HUDScore.h"
 #include "HUDMainMenu.h"
 #include "HUDEndGame.h"
+#include <GameFramework/PlayerStart.h>
 
 // Sets default values
 AMyStackGameCharacter::AMyStackGameCharacter()
@@ -45,9 +46,6 @@ void AMyStackGameCharacter::BeginPlay()
 	//Initialize score
 	Score = 0;
 	
-	//Set Camera rotation
-	SetActorRotation(CameraRotation);
-
 	//Add Main menu widget to viewport
 	UHUDMainMenu* MainMenuWidget = CreateWidget<UHUDMainMenu>(GetWorld(), HUDMainMenuClass);
 	if (MainMenuWidget)
@@ -117,7 +115,7 @@ void AMyStackGameCharacter::CreateEndGameWidget()
 
 void AMyStackGameCharacter::UpdateCamaraLocation(ABlock* NewBlock)
 {
-	CameraZOffset += CameraZOffsetIncrement;
+	CameraZOffset = GetActorLocation().Z + CameraZOffsetIncrement;
 	FVector NewCamaraLocation = FVector(GetActorLocation().X, GetActorLocation().Y, CameraZOffset);
 	SetActorLocation(NewCamaraLocation);
 }

@@ -31,15 +31,15 @@ ABlock::ABlock()
 	//Spawning
 	ImpulseStrength = 5000.0f;
 	SizeToResize = 0.5f;
-
-	MinBoundsX = -BlockMesh->Bounds.BoxExtent.X;
-	MaxBoundsX = BlockMesh->Bounds.BoxExtent.X;
 }
 
 // Called when the game starts or when spawned
 void ABlock::BeginPlay()
 {
 	Super::BeginPlay();
+
+	MinBoundsX = -BlockMesh->Bounds.BoxExtent.X;
+	MaxBoundsX = BlockMesh->Bounds.BoxExtent.X;
 
 	SplitBlockClass = ABlock::StaticClass();
 	PhysicsBlockClass = ABlock::StaticClass();
