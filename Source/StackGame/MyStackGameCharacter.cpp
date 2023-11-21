@@ -9,6 +9,7 @@
 #include "HUDMainMenu.h"
 #include "HUDEndGame.h"
 #include <GameFramework/PlayerStart.h>
+#include "BlockPool.h"
 
 // Sets default values
 AMyStackGameCharacter::AMyStackGameCharacter()

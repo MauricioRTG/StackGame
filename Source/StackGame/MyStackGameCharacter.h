@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "BlockPool.h"
 #include "MyStackGameCharacter.generated.h"
 
 UCLASS()
@@ -52,8 +51,8 @@ private:
 	UPROPERTY()
 	ABlockPool* BP_BlockPool;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "BlockPool", meta = (AllowPrivateAccess = "true"))
-	TSubclassOf<ABlockPool> BlockPoolClass;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "BlockPool", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<class ABlockPool> BlockPoolClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BlockPool", meta = (AllowPrivateAccess = "true"))
 	int32 PoolSize = 1;
@@ -73,7 +72,7 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* CameraComponent;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI", meta = (AllowPrivateAccess))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<class UUserWidget> HUDScoreClass;
 
 	UFUNCTION()

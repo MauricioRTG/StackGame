@@ -19,6 +19,9 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	UPROPERTY(EditAnywhere, Category = "Effect")
+	class UNiagaraSystem* ConfettiEffect;
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -112,6 +115,9 @@ public:
 
 	UFUNCTION()
 		void SetBlockMesh(UStaticMesh* FunctionBlockMesh);
+
+	UFUNCTION()
+		void ActivateEffect();
 
 	UFUNCTION()
 		UStaticMeshComponent* GetBlockMeshComponent();

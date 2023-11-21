@@ -5,6 +5,8 @@
 #include "BlockPool.h"
 #include <Kismet/GameplayStatics.h>
 #include "MyStackGameCharacter.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraComponent.h"
 
 // Sets default values
 ABlock::ABlock()
@@ -103,6 +105,14 @@ void ABlock::SetBlockMesh(UStaticMesh* FunctionBlockMesh)
 
 }
 
+void ABlock::ActivateEffect()
+{
+	if (ConfettiEffect)
+	{
+		UNiagaraComponent* NiagaraComponent = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ConfettiEffect, GetActorLocation(), FRotator(0.0f), FVector(1.0f), true);
+	}
+}
+
 UStaticMeshComponent* ABlock::GetBlockMeshComponent()
 {
 	return BlockMesh;
@@ -160,12 +170,17 @@ void ABlock::SplitBlock()
 		UE_LOG(LogTemp, Log, TEXT("PreviousBoxSizeBound: %f"), PreviousBoxSizeBound);
 		UE_LOG(LogTemp, Log, TEXT("PreviousBlockXLocation: %f"), PreviousBlockLocation.X);
 
-		/*When the moving block is stopped and it has approximately the same location as the previous block, then don't spawn the non overlapping block*/
+		//When the moving block is stopped and it has approximately the same location as the previous block, then don't spawn the non overlapping block.
 		double NonOverlappingWidth = 0.0f;
-		if (BlockLocation.X > (PreviousBlockLocation.X + 4) || BlockLocation.X < (PreviousBlockLocation.X - 4))
+		if (BlockLocation.X > (PreviousBlockLocation.X + 7) || BlockLocation.X < (PreviousBlockLocation.X - 7))
 		{
 			//Spawn block that is the size of the non overlapping region
 			NonOverlappingWidth = SpawnNonOverlappingBlock(BlockLocation, PreviousBlockLocation, PreviousBoxSizeBound, CurrentBlockBoxSize);
+		}
+		else
+		{
+			//Activate confetti efect to celebrate that the user made the moving block have approximately the same location as the previous block
+			ActivateEffect();
 		}
 
 		//Spawn block that is the size of the overlapping region and return overlapping width
@@ -209,8 +224,6 @@ void ABlock::SpawnOverlappingBlock(FVector CurrentBlockLocation, FVector Previou
 
 	/*We obtain the OverlappingWith by subtracting the previosu box size (it can be also the current one because it hasn't change sizes yet) with the NonOverlappingWidth*/
 	double OverlappingWidth = PreviousBoxSizeBound - NonOverlappingWidth;
-	/*Clamp OverlappingWidth to be between 0 and 100 (100 is the size of the original block size)*/
-	//OverlappingWidth = FMath::Clamp(OverlappingWidth, 0.0f, 100.0f);
 	UE_LOG(LogTemp, Log, TEXT("OverlappingWidth: %f"), OverlappingWidth);
 
 	/*The idea is similar when obtaining the new NonOverlappingBlockLocation, but here we don't need an outside location but rather and inside location so the location of origin or reference will be the previous block location,
@@ -235,8 +248,6 @@ double ABlock::SpawnNonOverlappingBlock(FVector CurrentBlockLocation, FVector Pr
 	/*So the idea of this calcuation is to obtain the dimensions of the current block and the previous block, where we substract the current block x dimmension with the previous block X dimension,
 	Also taking into consideration the thier respective current locations in the space, because this are going to constantly change*/
 	double NonOverlappingWidth = FMath::Abs((CurrentBlockLocation.X + (CurrentBlockBoxSize / 2)) - ((PreviousBoxSize / 2) + PreviousBlockLocation.X));
-	/*Clamp NonOverlappingWidthto only be between 0 to 100, which 100 is the size of the first block in scene*/
-	//NonOverlappingWidth = FMath::Clamp(NonOverlappingWidth, 0.0f, 100.0f);
 	UE_LOG(LogTemp, Log, TEXT("NonOverlappingWidth: %f"), NonOverlappingWidth);
 
 	/*The idea of this calculation is that when the block is in the right side we first sum the previous block location and size and then sum it with the NonOverlappingWidth that is divded by two

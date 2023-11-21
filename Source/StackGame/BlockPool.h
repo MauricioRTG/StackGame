@@ -43,6 +43,6 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BlockPool", meta = (AllowPrivateAccess = "true"))
 	UStaticMesh* BlockMesh;
 
-	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "ActorSpawning", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere,BlueprintReadOnly, Category = "ActorSpawning", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<ABlock> BlockClass;
 };
