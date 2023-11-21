@@ -19,6 +19,9 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	UPROPERTY(EditAnywhere, Category = "Effect")
+	class UNiagaraSystem* ConfettiEffect;
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -84,16 +87,16 @@ public:
 		void SplitBlock();
 
 	UFUNCTION()
-		float SpawnOverlappingBlock(FVector CurrentBlockLocation, FVector PreviousBlockLocation, float PreviousBoxSizeBound);
+		void SpawnOverlappingBlock(FVector CurrentBlockLocation, FVector PreviousBlockLocation, double PreviousBoxSize, double NonOverlappingWidth);
 
 	UFUNCTION()
-		void SpawnNonOverlappingBlock(FVector CurrentBlockLocation, FVector PreviousBlockLocation, float PreviousBoxSizeBound, float OverlappingWidth);
+		double SpawnNonOverlappingBlock(FVector CurrentBlockLocation, FVector PreviousBlockLocation, double PreviousBoxSize, double CurrentBlockBoxSize);
 
 	UFUNCTION()
-		void SpawnPhysicsBlock(FVector SpawnLocation, FVector FunctionImpulseDirection, bool SimulatePhysics, float NewWidth, bool AddToPool);
+		void SpawnPhysicsBlock(FVector SpawnLocation, FVector FunctionImpulseDirection, bool SimulatePhysics, double NewWidth, bool AddToPool);
 
 	UFUNCTION()
-		void ResizeBlock(ABlock* NewBlock, float NewWidth);
+		void ResizeBlock(ABlock* NewBlock, double NewWidth);
 
 	UFUNCTION()
 		void BlockOscillation(float DeltaTime);
@@ -112,6 +115,9 @@ public:
 
 	UFUNCTION()
 		void SetBlockMesh(UStaticMesh* FunctionBlockMesh);
+
+	UFUNCTION()
+		void ActivateEffect();
 
 	UFUNCTION()
 		UStaticMeshComponent* GetBlockMeshComponent();
